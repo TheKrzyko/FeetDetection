@@ -6,6 +6,8 @@ using Emgu.CV.Util;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
+using System.Linq;
 
 namespace FeetDetectionLibrary
 {
@@ -15,16 +17,42 @@ namespace FeetDetectionLibrary
         {
             private bool doPerspective = false;
             private Mat warpMatrix = null;
+            public void Callibrate(string inputPerspectiveFilename) {
+
+                int[] srcv = File.ReadAllText(inputPerspectiveFilename).Split('\n', ',').Select(str => int.Parse(str)).ToArray();
+                PointF[] src = new PointF[4];
+                src[0] = new PointF(srcv[0], srcv[1]);
+                src[1] = new PointF(srcv[2], srcv[3]);
+                src[2] = new PointF(srcv[4], srcv[5]);
+                src[3] = new PointF(srcv[6], srcv[7]);
+                int[] dstv = { 0, 0, 2400, 0, 0, 2400, 2400, 2400 };
+                PointF[] dst = new PointF[4];
+                dst[0] = new PointF(dstv[0], dstv[1]);
+                dst[1] = new PointF(dstv[2], dstv[3]);
+                dst[2] = new PointF(dstv[4], dstv[5]);
+                dst[3] = new PointF(dstv[6], dstv[7]);
+                this.CallibratePerspective(src,dst);
+            }
+
             public void TestCallibrate()
             {
-                int[,] srcv = { {1300, 574},{2834, 302},{1114, 2521},{2596, 3136} };
-                Matrix<int> src = new Matrix<int>(srcv);
-                int[,] dstv =  {{0,0},{2400,0},{0,2400},{2400,2400}};
-                Matrix<int> dst = new Matrix<int>(dstv);
+                int[] srcv = { 1300, 574,2834, 302,1114, 2521,2596, 3136};
+                PointF[] src = new PointF[4];
+                src[0] = new PointF(srcv[0], srcv[1]);
+                src[1] = new PointF(srcv[2], srcv[3]);
+                src[2] = new PointF(srcv[4], srcv[5]);
+                src[3] = new PointF(srcv[6], srcv[7]);
+
+                int[] dstv =  {0,0,2400,0,0,2400,2400,2400};
+                PointF[] dst = new PointF[4];
+                dst[0] = new PointF(dstv[0], dstv[1]);
+                dst[1] = new PointF(dstv[2], dstv[3]);
+                dst[2] = new PointF(dstv[4], dstv[5]);
+                dst[3] = new PointF(dstv[6], dstv[7]);
                 this.CallibratePerspective(src,dst);
 
             }
-            public void CallibratePerspective(IInputArray src, IInputArray dst)
+            public void CallibratePerspective(PointF[] src, PointF[] dst)
             { 
                 doPerspective = true;
                 this.warpMatrix = CvInvoke.GetPerspectiveTransform(src, dst);
@@ -78,6 +106,7 @@ namespace FeetDetectionLibrary
                 
                 var conturs = new VectorOfVectorOfPoint();
                 CvInvoke.FindContours(tresholdImage, conturs, null, RetrType.Tree, ChainApproxMethod.ChainApproxSimple);
+                frame.Draw(conturs, -1, new Bgr(255, 0, 0), 2);
                 for (int i = 0; i < conturs.Size; i++)
                 {
                     using(VectorOfPoint contour = conturs[i])
@@ -86,6 +115,7 @@ namespace FeetDetectionLibrary
                         {
                             continue;
                         }
+                        
                         var box = CvInvoke.FitEllipse(contour);
                         if (isCorrectBox(box) && isFootSize(box))
                         {

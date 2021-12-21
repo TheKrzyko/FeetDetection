@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31410.357
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FeetDetection", "FeetDetection\FeetDetection.csproj", "{95E6A969-D417-4610-948F-045CE50DE461}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FeetDetection", "FeetDetection\FeetDetection.csproj", "{95E6A969-D417-4610-948F-045CE50DE461}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FeetDetectionLibrary", "FeetDetectionLibrary\FeetDetectionLibrary.csproj", "{150FC9AF-33D7-4C19-AC88-74971250D74B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FeetDetectionLibrary", "FeetDetectionLibrary\FeetDetectionLibrary.csproj", "{150FC9AF-33D7-4C19-AC88-74971250D74B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
