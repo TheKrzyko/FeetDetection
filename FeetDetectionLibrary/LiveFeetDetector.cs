@@ -9,6 +9,7 @@ using System.Drawing;
 using System.IO;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace FeetDetection1
 {
@@ -17,7 +18,7 @@ namespace FeetDetection1
         public bool Life { get; set; }
         public List<RotatedRect> Boxes { get; set; }
         private readonly FeetDetection detection = new FeetDetection();
-        private Thread thread;
+        private Task detectingJob;
         private FeetDetection.Preprocess perspective;
         public bool IsRunning { get; private set; }
         public LiveFeetDetector(bool Life=true)
@@ -36,8 +37,8 @@ namespace FeetDetection1
             var fourcc = VideoWriter.Fourcc('m', 'p', '4', 'v');
             var frame = new Mat();
 
-            thread = new Thread(new ThreadStart(() => Detect(camera)));
-            thread.Start(camera);
+            detectingJob = Task.Run(() => Detect(camera));
+            detectingJob.Start();
             IsRunning = true;
             //videoWriter.Dispose();
         }
