@@ -26,8 +26,6 @@ namespace PerformanceTests
         public void LoadFrames()
         {
             frames = imageProvider.LoadImagesOfType(imageType)
-                .Select(image => preprocess.preprocess(image))
-                .Select(image => resizeImage(image))
                 .ToList();
         }
 
