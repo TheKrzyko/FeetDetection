@@ -15,6 +15,9 @@ namespace FeetDetection1
     {
         static FeetDetection detection = new FeetDetection();
         static FeetDetection.Preprocess preprocess = new FeetDetection.Preprocess();
+        /**
+         * Process all images from /images/ directory and save results in output directory. 
+         */
         static void Main(string[] args)
         {
             Console.WriteLine("Started");

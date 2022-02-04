@@ -68,22 +68,17 @@ namespace FeetDetectionLibrary
             }
         }
 
-        public bool isFootProprtion(float width, float height)
+        private bool isFootProprtion(float width, float height)
         {
             float minFootProportion = 1.4f;
             float maxFootProportion = 7;
             float footProportionA = width / height;
             float footProportionB = height / width;
-            return between(footProportionA, minFootProportion, maxFootProportion) || between(footProportionB, minFootProportion,
-                                                                                     maxFootProportion);
-        }
-        
-        public Image<Bgr, byte> LoadFromFile(string name)
-        {
-            return new Image<Bgr, byte>(".\\" + name);
+            return  between(footProportionA, minFootProportion, maxFootProportion) || 
+                    between(footProportionB, minFootProportion, maxFootProportion);
         }
 
-        public bool isFootSize(RotatedRect box)
+        private bool isFootSize(RotatedRect box)
         {
             float width = box.Size.Width;
             float height = box.Size.Height;
@@ -91,7 +86,7 @@ namespace FeetDetectionLibrary
             return isFootProprtion(width, height) && between(footSize, 3000, 16000);
         }
 
-        public bool between(float value, float min, float max){
+        private bool between(float value, float min, float max){
             return (value > min) && (value < max);
         }
         public List<RotatedRect> detect(Image<Bgr, byte> frame)
@@ -105,7 +100,7 @@ namespace FeetDetectionLibrary
             Image<Gray, byte> imageGray = frame.Convert<Gray, byte>();
             using (var filtered = filter(imageGray))
             {
-                tresholdImage = filtered.ThresholdAdaptive(new Gray(220), AdaptiveThresholdType.GaussianC, ThresholdType.Binary, 55, new Gray(3));
+                tresholdImage = filtered.ThresholdAdaptive(new Gray(255), AdaptiveThresholdType.GaussianC, ThresholdType.Binary, 55, new Gray(5));
                 var conturs = new VectorOfVectorOfPoint();
                 CvInvoke.FindContours(tresholdImage, conturs, null, RetrType.Tree, ChainApproxMethod.ChainApproxSimple);
 
