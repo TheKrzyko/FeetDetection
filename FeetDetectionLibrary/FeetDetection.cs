@@ -80,7 +80,7 @@ namespace FeetDetectionLibrary
         
         public Image<Bgr, byte> LoadFromFile(string name)
         {
-            return new Image<Bgr, byte>(".\\" + name);   
+            return new Image<Bgr, byte>(".\\" + name);
         }
 
         public bool isFootSize(RotatedRect box)
@@ -94,19 +94,21 @@ namespace FeetDetectionLibrary
         public bool between(float value, float min, float max){
             return (value > min) && (value < max);
         }
-
         public List<RotatedRect> detect(Image<Bgr, byte> frame)
         {
-            var tresholdValue = 255;
+            Image<Gray, byte> t;
+            return detect(frame, out t);
+        }
+        public List<RotatedRect> detect(Image<Bgr, byte> frame, out Image<Gray, byte> tresholdImage)
+        {
             List<RotatedRect> boxes = new List<RotatedRect>();
             Image<Gray, byte> imageGray = frame.Convert<Gray, byte>();
             using (var filtered = filter(imageGray))
-            using (var tresholdImage = filtered.ThresholdAdaptive(new Gray(220), AdaptiveThresholdType.GaussianC, ThresholdType.Binary, 55, new Gray(3)))
             {
-                
+                tresholdImage = filtered.ThresholdAdaptive(new Gray(220), AdaptiveThresholdType.GaussianC, ThresholdType.Binary, 55, new Gray(3));
                 var conturs = new VectorOfVectorOfPoint();
                 CvInvoke.FindContours(tresholdImage, conturs, null, RetrType.Tree, ChainApproxMethod.ChainApproxSimple);
-                frame.Draw(conturs, -1, new Bgr(255, 0, 0), 2);
+
                 for (int i = 0; i < conturs.Size; i++)
                 {
                     using(VectorOfPoint contour = conturs[i])

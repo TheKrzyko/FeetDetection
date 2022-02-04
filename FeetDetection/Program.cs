@@ -6,56 +6,58 @@ using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace FeetDetection1
 {
     class Program
     {
-        private static FeetDetection detection = new FeetDetection();
+        static FeetDetection detection = new FeetDetection();
+        static FeetDetection.Preprocess preprocess = new FeetDetection.Preprocess();
         static void Main(string[] args)
         {
-            var csv = new StringBuilder();
-            for(int i = 0; i < 10; i++)
+            Console.WriteLine("Started");
+            preprocess.Callibrate("images/perspectiveInput.csv");
+
+            foreach (var dir in Directory.EnumerateDirectories("images"))
             {
-                DetectVideo("perspectiveInput.csv");
+                foreach(var filePath in Directory.EnumerateFiles(dir))
+                {
+                    ProcessAndSaveImage(filePath);
+                }
             }
-            
-            var file = "IMG_3522.JPG";
-            var image = detection.LoadFromFile(file);
-            var img2 = image.Resize(900, 600, Inter.Linear);
-            var boxes = detection.detect(img2);
-            foreach (var box in boxes)
-            {
-                img2.Draw(box, new Bgr(0, 255, 0), 1);
-                //img2.Draw(new Ellipse(box), new Bgr(0, 0, 255));
-            }
-            //CvInvoke.Imshow("Window", img2);
-            
+                
+            Console.WriteLine("Finished");
         }
 
-        static void DetectVideo(string inputPerspectiveFilename)
+        static void ProcessAndSaveImage(string filepath)
         {
-            var perspective = new FeetDetection.Preprocess();
-            perspective.Callibrate(inputPerspectiveFilename);
-            var videoFile = "video.mp4";
-            var camera = new VideoCapture(videoFile);
-            var fourcc = VideoWriter.Fourcc('m', 'p', '4', 'v');
-            var frame = new Mat();
-            var counter = 0;
-            while (camera.IsOpened)
-            {
-                camera.Read(frame);
-                if (frame.IsEmpty)
-                    break;
-                counter++;
-                var img2 = frame.ToImage<Bgr, byte>();
-                var img3 = perspective.preprocess(img2).Resize(900, 600, Inter.Linear);
-                var boxes = detection.detect(img3);
+            Console.WriteLine("Processing: " + filepath);
+            Image<Gray, byte> thresholdImage;
+            var image = new Image<Bgr, byte>(filepath);
+            image = preprocess.preprocess(image);
+            image = image.Resize(720, 480, Inter.Linear);
+            var boxes = detection.detect(image, out thresholdImage);
+            boxes.ForEach(box => image.Draw(box, new Bgr(0, 255, 0), 1));
+            var outputPath = GetImageOutputPath(filepath);
+            Directory.CreateDirectory("output");
+            image.Save(outputPath);
+            thresholdImage.Save(GetThresholdOutputPath(filepath));
+            Console.WriteLine("Saved: " + outputPath);
+        }
 
-                //videoWriter.Write(img2);
-            }
-            //videoWriter.Dispose();
+        static string GetImageOutputPath(string inputPath)
+        {
+            var filename = Path.GetFileName(inputPath);
+            return Path.Combine("output", filename);
+        }
+
+        static string GetThresholdOutputPath(string inputPath)
+        {
+            var filename = Path.GetFileNameWithoutExtension(inputPath);
+            var ext = Path.GetExtension(inputPath);
+            return Path.Combine("output", filename + "-thr" + ext);
         }
     }
 }
