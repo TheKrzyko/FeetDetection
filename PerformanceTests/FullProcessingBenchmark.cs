@@ -34,7 +34,7 @@ namespace PerformanceTests
         {
             var preprocessed = preprocess.preprocess(frames.PickRandom());
             var resized = resizeImage(preprocessed);
-            detection.detect(resized);
+            detection.detectAsPixelCoord(resized);
         }
     }
 }

@@ -32,7 +32,7 @@ namespace PerformanceTests
         }
 
         [Benchmark]
-        public void Benchmark() => detection.detect(frames.PickRandom());
+        public void Benchmark() => detection.detectAsPixelCoord(frames.PickRandom());
 
     }
 }

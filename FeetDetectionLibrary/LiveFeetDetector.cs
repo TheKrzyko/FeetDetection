@@ -58,7 +58,7 @@ namespace FeetDetection1
                     break;
                 var img2 = frame.ToImage<Bgr, byte>();
                 var img3 = perspective.preprocess(img2).Resize(900, 600, Inter.Linear);
-                this.Boxes = detection.detect(img3);
+                this.Boxes = detection.detectAsPixelCoord(img3);
                 //videoWriter.Write(img2);
             }
         }

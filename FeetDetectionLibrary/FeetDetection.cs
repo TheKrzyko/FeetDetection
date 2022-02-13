@@ -89,12 +89,43 @@ namespace FeetDetectionLibrary
         private bool between(float value, float min, float max){
             return (value > min) && (value < max);
         }
+
+        private RotatedRect scaleRelativeToSize(RotatedRect rect, SizeF size)
+        {
+            rect.Size.Width /= size.Width;
+            rect.Size.Height /= size.Height;
+            rect.Center.X /= size.Width;
+            rect.Center.Y /= size.Height;
+            return rect;
+        }
+
+        /// <summary>
+        /// Detects feet ellipses in image.
+        /// </summary>
+        /// <param name="frame">Preprocessed input image</param>
+        /// <returns>List of RotatedRect, represented as coordinates in range 0 to 1.</returns>
         public List<RotatedRect> detect(Image<Bgr, byte> frame)
         {
-            Image<Gray, byte> t;
-            return detect(frame, out t);
+            var rects = detectAsPixelCoord(frame);
+            for (int i = 0; i < rects.Count; i++)
+            {
+                rects[i] = scaleRelativeToSize(rects[i], frame.Size);
+            }
+            return rects;
         }
-        public List<RotatedRect> detect(Image<Bgr, byte> frame, out Image<Gray, byte> tresholdImage)
+
+        /// <summary>
+        /// Detects feet ellipses in image.
+        /// </summary>
+        /// <param name="frame">Preprocessed input image</param>
+        /// <returns>List of RotatedRect, represented as pixel coordinates of input frame</returns>
+        public List<RotatedRect> detectAsPixelCoord(Image<Bgr, byte> frame)
+        {
+            Image<Gray, byte> t;
+            return detectAsPixelCoord(frame, out t);
+        }
+
+        public List<RotatedRect> detectAsPixelCoord(Image<Bgr, byte> frame, out Image<Gray, byte> tresholdImage)
         {
             List<RotatedRect> boxes = new List<RotatedRect>();
             Image<Gray, byte> imageGray = frame.Convert<Gray, byte>();

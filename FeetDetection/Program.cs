@@ -41,7 +41,7 @@ namespace FeetDetection1
             var image = new Image<Bgr, byte>(filepath);
             image = preprocess.preprocess(image);
             image = image.Resize(720, 480, Inter.Linear);
-            var boxes = detection.detect(image, out thresholdImage);
+            var boxes = detection.detectAsPixelCoord(image, out thresholdImage);
             boxes.ForEach(box => image.Draw(box, new Bgr(0, 255, 0), 1));
             var outputPath = GetImageOutputPath(filepath);
             Directory.CreateDirectory("output");
