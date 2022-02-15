@@ -1,6 +1,5 @@
 ﻿using Emgu.CV;
 using Emgu.CV.CvEnum;
-using Emgu.CV.Ocl;
 using Emgu.CV.Structure;
 using Emgu.CV.Util;
 using System;
@@ -13,6 +12,11 @@ namespace FeetDetectionLibrary
 {
     public class FeetDetection
     {
+        private readonly float MIN_FOOT_PROPORTION = 2.1f;
+        private readonly float MAX_FOOT_PROPORTION = 5.0f;
+        private readonly float MIN_FOOT_AREA = 0.009f;
+        private readonly float MAX_FOOT_AREA = 0.02f;
+
         public class Preprocess
         {
             private bool doPerspective = false;
@@ -68,22 +72,19 @@ namespace FeetDetectionLibrary
             }
         }
 
-        private bool isFootProprtion(float width, float height)
+        private bool isFootProportion(float width, float height)
         {
-            float minFootProportion = 1.4f;
-            float maxFootProportion = 7;
-            float footProportionA = width / height;
-            float footProportionB = height / width;
-            return  between(footProportionA, minFootProportion, maxFootProportion) || 
-                    between(footProportionB, minFootProportion, maxFootProportion);
+            var min = Math.Min(width, height);
+            var max = Math.Max(width, height);
+            return between(max/min, MIN_FOOT_PROPORTION, MAX_FOOT_PROPORTION);
         }
 
-        private bool isFootSize(RotatedRect box)
+        private bool isFootSize(RotatedRect box, float frameArea)
         {
             float width = box.Size.Width;
             float height = box.Size.Height;
-            float footSize = width * height;
-            return isFootProprtion(width, height) && between(footSize, 3000, 16000);
+            float footArea = width * height;
+            return isFootProportion(width, height) && between(footArea/frameArea, MIN_FOOT_AREA, MAX_FOOT_AREA);
         }
 
         private bool between(float value, float min, float max){
@@ -129,6 +130,7 @@ namespace FeetDetectionLibrary
         {
             List<RotatedRect> boxes = new List<RotatedRect>();
             Image<Gray, byte> imageGray = frame.Convert<Gray, byte>();
+            var frameArea = frame.Width * frame.Height;
             using (var filtered = filter(imageGray))
             {
                 tresholdImage = filtered.ThresholdAdaptive(new Gray(255), AdaptiveThresholdType.GaussianC, ThresholdType.Binary, 55, new Gray(5));
@@ -145,7 +147,7 @@ namespace FeetDetectionLibrary
                         }
                         
                         var box = CvInvoke.FitEllipse(contour);
-                        if (isCorrectBox(box) && isFootSize(box))
+                        if (isCorrectBox(box) && isFootSize(box, frameArea))
                         {
                             boxes.Add(box);
                         }
